@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Replicate AI">
+<title>Replicate AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a14;
+    --surface: #111122;
+    --surface2: #181830;
+    --border: #ffffff0f;
+    --border2: #ffffff1a;
+    --text: #f0eeff;
+    --muted: #7070a0;
+    --accent: #7c3aed;
+    --accent2: #a855f7;
+    --glow: #7c3aed40;
+    --green: #10b981;
+    --orange: #f97316;
+    --blue: #3b82f6;
+    --red: #ef4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+  }
+
+  /* ── APP SHELL ── */
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+    gap: 12px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  .api-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 7px 12px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .api-btn:active { background: var(--accent); color: white; border-color: var(--accent); }
+  .api-btn.set { color: var(--green); border-color: var(--green)30; }
+
+  /* ── TABS ── */
+  nav {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  nav button {
+    flex: 1;
+    padding: 12px 4px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color .2s;
+    border-bottom: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  nav button .tab-icon { font-size: 18px; }
+
+  nav button.active {
+    color: var(--accent2);
+    border-bottom-color: var(--accent2);
+  }
+
+  /* ── PANELS ── */
+  main {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .panel { display: none; padding: 16px; gap: 14px; flex-direction: column; }
+  .panel.active { display: flex; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── FORM ELEMENTS ── */
+  label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  select, textarea, input[type="text"], input[type="password"], input[type="number"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color .2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  select:focus, textarea:focus, input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--glow);
+  }
+
+  textarea { resize: none; min-height: 90px; line-height: 1.6; }
+
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  /* ── SLIDERS ── */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--accent2);
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--glow);
+  }
+
+  .slider-val {
+    font-size: 13px;
+    color: var(--accent2);
+    min-width: 36px;
+    text-align: right;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    cursor: pointer;
+    transition: all .15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    box-shadow: 0 4px 20px var(--glow);
+  }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border2);
+  }
+
+  .btn-green { background: linear-gradient(135deg, #059669, var(--green)); color: white; }
+  .btn-orange { background: linear-gradient(135deg, #ea580c, var(--orange)); color: white; }
+  .btn-blue { background: linear-gradient(135deg, #2563eb, var(--blue)); color: white; }
+
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn { flex: 1; }
+
+  /* ── STATUS / OUTPUT ── */
+  .status {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    min-height: 18px;
+    padding: 2px 0;
+  }
+
+  .status.ok { color: var(--green); }
+  .status.err { color: var(--red); }
+
+  .loader {
+    display: none;
+    width: 28px; height: 28px;
+    border: 3px solid var(--border2);
+    border-top-color: var(--accent2);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    margin: 0 auto;
+  }
+  .loader.show { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESULT IMAGE ── */
+  .result-img-wrap {
+    display: none;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    aspect-ratio: 1;
+  }
+  .result-img-wrap.show { display: block; }
+  .result-img-wrap img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+  /* ── TEXT OUTPUT ── */
+  .text-output {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 14px;
+    min-height: 120px;
+    max-height: 280px;
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+    display: none;
+  }
+  .text-output.show { display: block; }
+
+  /* ── IMAGE PICKER ── */
+  .img-picker {
+    border: 2px dashed var(--border2);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s;
+    color: var(--muted);
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .img-picker:active { border-color: var(--accent); }
+  .img-picker .pick-icon { font-size: 32px; }
+
+  .preview-img {
+    width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+    border-radius: 10px;
+    display: none;
+    border: 1px solid var(--border2);
+  }
+  .preview-img.show { display: block; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000000cc;
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 20px 20px 0 0;
+    padding: 24px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: slideUp .25s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } }
+
+  .modal h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .modal p { color: var(--muted); font-size: 12px; line-height: 1.6; }
+  .modal a { color: var(--accent2); }
+
+  /* ── TWO COL ── */
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    height: 3px;
+    background: var(--border2);
+    border-radius: 2px;
+    overflow: hidden;
+    display: none;
+  }
+  .progress-bar.show { display: block; }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    width: 30%;
+    border-radius: 2px;
+    animation: progress 2s ease-in-out infinite alternate;
+  }
+  @keyframes progress { to { width: 90%; } }
+
+  /* ── DOWNLOAD BTN ── */
+  .dl-btn {
+    display: none;
+    text-decoration: none;
+  }
+  .dl-btn.show { display: block; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">✦</div>
+      Replicate AI
+    </div>
+    <button class="api-btn" id="apiBtn" onclick="openModal()">⚙ Clé API</button>
+  </header>
+
+  <!-- TABS -->
+  <nav>
+    <button class="active" onclick="switchTab('img')">
+      <span class="tab-icon">🎨</span>Images
+    </button>
+    <button onclick="switchTab('txt')">
+      <span class="tab-icon">🤖</span>Texte
+    </button>
+    <button onclick="switchTab('proc')">
+      <span class="tab-icon">🖼️</span>Traitement
+    </button>
+  </nav>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- ── TAB IMAGE GEN ── -->
+    <div class="panel active" id="panel-img">
+
+      <div class="card">
+        <div class="card-title">Modèle</div>
+        <div class="select-wrap">
+          <select id="imgModel">
+            <option value="black-forest-labs/flux-schnell">⚡ FLUX Schnell (rapide)</option>
+            <option value="black-forest-labs/flux-1.1-pro" selected>✨ FLUX 1.1 Pro (qualité)</option>
+            <option value="stability-ai/sdxl:7762fd07cf82c948538e41f63f77d685e02b063e0a25fb2ae447b5a975c7df6c">🎭 Stable Diffusion XL</option>
+            <option value="bytedance/sdxl-lightning-4step:727e49a643e999d602a896c774a0658ffefea21465756a6ce24b7ea4165fffb3">🌩 SDXL Lightning (4 steps)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Prompt</div>
+        <div>
+          <label>Description de l'image</label>
+          <textarea id="imgPrompt" placeholder="Une forêt enchantée au coucher du soleil, style cinématique, 8k, hyperréaliste..."></textarea>
+        </div>
+        <div>
+          <label>Prompt négatif (optionnel)</label>
+          <textarea id="imgNeg" style="min-height:60px" placeholder="flou, mauvaise qualité, déformé..."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Paramètres</div>
+        <div class="row2">
+          <div>
+            <label>Largeur</label>
+            <input type="number" id="imgW" value="1024" min="512" max="2048" step="64">
+          </div>
+          <div>
+            <label>Hauteur</label>
+            <input type="number" id="imgH" value="1024" min="512" max="2048" step="64">
+          </div>
+        </div>
+        <div>
+          <label>Étapes — <span id="stepsVal">28</span></label>
+          <div class="slider-row">
+            <input type="range" id="stepsSlider" min="4" max="50" value="28"
+              oninput="document.getElementById('stepsVal').textContent=this.value">
+          </div>
+        </div>
+        <div>
+          <label>Guidance Scale — <span id="guidVal">7.5</span></label>
+          <div class="slider-row">
+            <input type="range" id="guidSlider" min="1" max="20" step="0.5" value="7.5"
+              oninput="document.getElementById('guidVal').textContent=this.value">
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="imgGenBtn" onclick="generateImage()">✦ Générer l'image</button>
+
+      <div class="progress-bar" id="imgProgress"><div class="progress-fill"></div></div>
+      <div class="status" id="imgStatus"></div>
+      <div class="loader" id="imgLoader"></div>
+
+      <div class="result-img-wrap" id="imgResult">
+        <img id="imgResultImg" src="" alt="Résultat">
+      </div>
+
+      <a class="btn btn-secondary dl-btn" id="imgDl" download="replicate-image.jpg">⬇ Télécharger</a>
+    </div>
+
+    <!-- ── TAB TEXT GEN ── -->
+    <div class="panel" id="panel-txt">
+
+      <div class="card">
+        <div class="card-title">Modèle LLM</div>
+        <div class="select-wrap">
+          <select id="txtModel">
+            <option value="meta/meta-llama-3.1-8b-instruct">🦙 Llama 3.1 8B</option>
+            <option value="meta/meta-llama-3.1-70b-instruct">🦙 Llama 3.1 70B</option>
+            <option value="mistralai/mistral-7b-instruct-v0.2">🌪 Mistral 7B</option>
+            <option value="mistralai/mixtral-8x7b-instruct-v0.1">🌀 Mixtral 8x7B</option>
+            <option value="google-deepmind/gemma-7b-it">💎 Gemma 7B</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <label>Prompt système (optionnel)</label>
+          <textarea id="txtSystem" style="min-height:60px" placeholder="Tu es un assistant utile et concis..."></textarea>
+        </div>
+        <div>
+          <label>Votre message</label>
+          <textarea id="txtPrompt" style="min-height:100px" placeholder="Explique-moi comment fonctionne un réseau de neurones..."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Paramètres</div>
+        <div>
+          <label>Max tokens — <span id="tokVal">512</span></label>
+          <input type="range" id="tokSlider" min="64" max="2048" step="64" value="512"
+            oninput="document.getElementById('tokVal').textContent=this.value">
+        </div>
+        <div>
+          <label>Température — <span id="tempVal">0.7</span></label>
+          <input type="range" id="tempSlider" min="0.1" max="2.0" step="0.1" value="0.7"
+            oninput="document.getElementById('tempVal').textContent=parseFloat(this.value).toFixed(1)">
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-blue" id="txtBtn" onclick="generateText()">🚀 Envoyer</button>
+        <button class="btn btn-secondary" onclick="clearText()" style="max-width:90px">Effacer</button>
+      </div>
+
+      <div class="progress-bar" id="txtProgress"><div class="progress-fill"></div></div>
+      <div class="status" id="txtStatus"></div>
+      <div class="loader" id="txtLoader"></div>
+
+      <div class="text-output" id="txtOutput"></div>
+    </div>
+
+    <!-- ── TAB IMAGE PROCESS ── -->
+    <div class="panel" id="panel-proc">
+
+      <div class="card">
+        <div class="card-title">Image source</div>
+        <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFilePick(event)">
+        <div class="img-picker" onclick="document.getElementById('fileInput').click()">
+          <span class="pick-icon">📁</span>
+          <span>Appuyer pour sélectionner une image</span>
+          <span style="font-size:11px">JPG, PNG, WEBP</span>
+        </div>
+        <img class="preview-img" id="previewImg" src="" alt="Aperçu">
+      </div>
+
+      <div class="card">
+        <div class="card-title">Opération</div>
+        <button class="btn btn-orange" onclick="processImage('upscale')">🔍 Améliorer la résolution ×4</button>
+        <button class="btn btn-primary" onclick="processImage('rembg')">✂️ Supprimer le fond</button>
+        <button class="btn btn-blue" onclick="processImage('restore')">✨ Restaurer les visages</button>
+      </div>
+
+      <div class="progress-bar" id="procProgress"><div class="progress-fill"></div></div>
+      <div class="status" id="procStatus"></div>
+      <div class="loader" id="procLoader"></div>
+
+      <div class="result-img-wrap" id="procResult">
+        <img id="procResultImg" src="" alt="Résultat">
+      </div>
+
+      <a class="btn btn-secondary dl-btn" id="procDl" download="replicate-processed.png">⬇ Télécharger le résultat</a>
+    </div>
+
+  </main>
+</div>
+
+<!-- API KEY MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <h2>⚙ Clé API Replicate</h2>
+    <p>Obtenez votre clé gratuite sur<br><a href="https://replicate.com/account/api-tokens" target="_blank">replicate.com/account/api-tokens</a></p>
+    <div>
+      <label>Votre clé API (r8_...)</label>
+      <input type="password" id="apiInput" placeholder="r8_xxxxxxxxxxxxxxxxxxxx">
+    </div>
+    <button class="btn btn-primary" onclick="saveApiKey()">Enregistrer</button>
+    <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────────
+let apiKey = localStorage.getItem('replicate_key') || '';
+let selectedImageBase64 = null;
+let currentPredictionId = null;
+
+// ── INIT ───────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  updateApiBtn();
+  if (!apiKey) setTimeout(openModal, 600);
+});
+
+function updateApiBtn() {
+  const btn = document.getElementById('apiBtn');
+  if (apiKey) {
+    btn.textContent = '✓ API';
+    btn.classList.add('set');
+  } else {
+    btn.textContent = '⚙ Clé API';
+    btn.classList.remove('set');
+  }
+}
+
+// ── TABS ───────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  const idx = {img:0, txt:1, proc:2}[tab];
+  document.querySelectorAll('nav button')[idx].classList.add('active');
+}
+
+// ── MODAL ──────────────────────────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('apiInput').value = apiKey;
+  setTimeout(() => document.getElementById('apiInput').focus(), 300);
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+function closeModalOutside(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+function saveApiKey() {
+  const val = document.getElementById('apiInput').value.trim();
+  if (val.length < 5) { alert('Clé invalide'); return; }
+  apiKey = val;
+  localStorage.setItem('replicate_key', val);
+  updateApiBtn();
+  closeModal();
+}
+
+// ── API HELPERS ────────────────────────────────────────────────────────────────
+async function createPrediction(modelOrVersion, input) {
+  // Detect if it's a model ID (owner/model) or a version hash
+  const isVersionHash = modelOrVersion.includes(':');
+  const body = isVersionHash
+    ? { version: modelOrVersion.split(':')[1], input }
+    : { input };
+
+  const endpoint = isVersionHash
+    ? 'https://api.replicate.com/v1/predictions'
+    : `https://api.replicate.com/v1/models/${modelOrVersion}/predictions`;
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Authorization': `Token ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `Erreur ${res.status}`);
+  }
+  return res.json();
+}
+
+async function pollPrediction(id, onStatus) {
+  for (let i = 0; i < 120; i++) {
+    await sleep(i < 5 ? 1200 : 2000);
+    const res = await fetch(`https://api.replicate.com/v1/predictions/${id}`, {
+      headers: { 'Authorization': `Token ${apiKey}` }
+    });
+    const data = await res.json();
+    onStatus(data.status, i);
+    if (data.status === 'succeeded') return data.output;
+    if (data.status === 'failed') throw new Error(data.error || 'Échec');
+    if (data.status === 'canceled') throw new Error('Annulé');
+  }
+  throw new Error('Timeout');
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function setLoading(prefix, loading) {
+  document.getElementById(prefix + 'Loader').classList.toggle('show', loading);
+  document.getElementById(prefix + 'Progress').classList.toggle('show', loading);
+}
+
+function setStatus(prefix, msg, type = '') {
+  const el = document.getElementById(prefix + 'Status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+}
+
+function checkKey() {
+  if (!apiKey) { openModal(); return false; }
+  return true;
+}
+
+// ── IMAGE GENERATION ───────────────────────────────────────────────────────────
+async function generateImage() {
+  if (!checkKey()) return;
+  const prompt = document.getElementById('imgPrompt').value.trim();
+  if (!prompt) { alert('Entrez un prompt'); return; }
+
+  const model = document.getElementById('imgModel').value;
+  const neg = document.getElementById('imgNeg').value.trim();
+  const w = parseInt(document.getElementById('imgW').value) || 1024;
+  const h = parseInt(document.getElementById('imgH').value) || 1024;
+  const steps = parseInt(document.getElementById('stepsSlider').value);
+  const guidance = parseFloat(document.getElementById('guidSlider').value);
+
+  const input = { prompt, width: w, height: h, num_inference_steps: steps, guidance_scale: guidance };
+  if (neg) input.negative_prompt = neg;
+
+  document.getElementById('imgGenBtn').disabled = true;
+  document.getElementById('imgResult').classList.remove('show');
+  document.getElementById('imgDl').classList.remove('show');
+  setLoading('img', true);
+  setStatus('img', 'Création de la prédiction...');
+
+  try {
+    const pred = await createPrediction(model, input);
+    setStatus('img', `ID: ${pred.id} — en attente...`);
+
+    const output = await pollPrediction(pred.id, (status, i) => {
+      setStatus('img', `Statut: ${status} (${i+1}s)`);
+    });
+
+    const url = Array.isArray(output) ? output[0] : output;
+    document.getElementById('imgResultImg').src = url;
+    document.getElementById('imgResult').classList.add('show');
+    document.getElementById('imgDl').href = url;
+    document.getElementById('imgDl').classList.add('show');
+    setStatus('img', '✓ Image générée avec succès !', 'ok');
+  } catch (e) {
+    setStatus('img', '✗ ' + e.message, 'err');
+  } finally {
+    setLoading('img', false);
+    document.getElementById('imgGenBtn').disabled = false;
+  }
+}
+
+// ── TEXT GENERATION ────────────────────────────────────────────────────────────
+async function generateText() {
+  if (!checkKey()) return;
+  const prompt = document.getElementById('txtPrompt').value.trim();
+  if (!prompt) { alert('Entrez un message'); return; }
+
+  const model = document.getElementById('txtModel').value;
+  const system = document.getElementById('txtSystem').value.trim();
+  const maxTokens = parseInt(document.getElementById('tokSlider').value);
+  const temp = parseFloat(document.getElementById('tempSlider').value);
+
+  const input = { prompt, max_new_tokens: maxTokens, temperature: temp };
+  if (system) input.system_prompt = system;
+
+  document.getElementById('txtBtn').disabled = true;
+  document.getElementById('txtOutput').classList.remove('show');
+  setLoading('txt', true);
+  setStatus('txt', 'Envoi...');
+
+  try {
+    const pred = await createPrediction(model, input);
+    const output = await pollPrediction(pred.id, (status, i) => {
+      setStatus('txt', `${status} (${i+1}s)`);
+    });
+
+    const text = Array.isArray(output) ? output.join('') : String(output || '');
+    document.getElementById('txtOutput').textContent = text;
+    document.getElementById('txtOutput').classList.add('show');
+    setStatus('txt', '✓ Réponse reçue', 'ok');
+  } catch (e) {
+    setStatus('txt', '✗ ' + e.message, 'err');
+  } finally {
+    setLoading('txt', false);
+    document.getElementById('txtBtn').disabled = false;
+  }
+}
+
+function clearText() {
+  document.getElementById('txtPrompt').value = '';
+  document.getElementById('txtOutput').textContent = '';
+  document.getElementById('txtOutput').classList.remove('show');
+  setStatus('txt', '');
+}
+
+// ── IMAGE PROCESSING ───────────────────────────────────────────────────────────
+function handleFilePick(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    selectedImageBase64 = ev.target.result; // full data URL
+    document.getElementById('previewImg').src = ev.target.result;
+    document.getElementById('previewImg').classList.add('show');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function processImage(op) {
+  if (!checkKey()) return;
+  if (!selectedImageBase64) { alert('Sélectionnez une image d\'abord'); return; }
+
+  const models = {
+    upscale: 'nightmareai/real-esrgan:f121d640bd286e1fdc67f9799164c1d5be36ff74576ee11c803ae5b665dd374',
+    rembg:   'cjwbw/rembg:fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec05c4',
+    restore: 'tencentarc/gfpgan:9283608cc6b7be6b65a8e44983db012355fde4132009bf99d976b2f0896856a'
+  };
+
+  const inputs = {
+    upscale: { image: selectedImageBase64, scale: 4 },
+    rembg:   { image: selectedImageBase64 },
+    restore: { img: selectedImageBase64, version: 'v1.4', scale: 2 }
+  };
+
+  const labels = { upscale: 'Upscaling ×4', rembg: 'Suppression de fond', restore: 'Restauration' };
+
+  document.getElementById('procResult').classList.remove('show');
+  document.getElementById('procDl').classList.remove('show');
+  setLoading('proc', true);
+  setStatus('proc', labels[op] + ' en cours...');
+
+  try {
+    const pred = await createPrediction(models[op], inputs[op]);
+    const output = await pollPrediction(pred.id, (status, i) => {
+      setStatus('proc', `${labels[op]}: ${status} (${i+1}s)`);
+    });
+
+    const url = Array.isArray(output) ? output[0] : String(output);
+    document.getElementById('procResultImg').src = url;
+    document.getElementById('procResult').classList.add('show');
+    document.getElementById('procDl').href = url;
+    document.getElementById('procDl').classList.add('show');
+    setStatus('proc', '✓ Traitement terminé !', 'ok');
+  } catch (e) {
+    setStatus('proc', '✗ ' + e.message, 'err');
+  } finally {
+    setLoading('proc', false);
+  }
+}
+</script>
+</body>
+</html>
